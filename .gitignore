@@ -1,0 +1,15 @@
+Debug/
+Release/
+*.elf
+*.bin
+*.hex
+*.map
+*.o
+*.d
+.cproject
+.project
+.settings/
+*.launch
+.vscode/
+.DS_Store
+Datasheets/
