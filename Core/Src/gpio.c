@@ -37,7 +37,7 @@ void GPIO_EnableClock(GPIO_TypeDef *port)
 
 void GPIO_Init(GPIO_TypeDef *port, uint8_t pin, const GPIO_Config *cfg)
 {
-	if (port == NULL || cfg == NULL) return;
+    if (port == NULL || cfg == NULL) return;
 
     /* Mode */
     port->MODER &= ~GPIO_2BIT_FIELD(pin);
@@ -57,7 +57,7 @@ void GPIO_Init(GPIO_TypeDef *port, uint8_t pin, const GPIO_Config *cfg)
 
     /* Alternate Function */
     if (cfg->mode == GPIO_MODE_AF) {
-    	port->AFR[pin / 8] &= ~AF_FIELD(pin);
-    	port->AFR[pin / 8] |= AF(pin, cfg->af);
+        port->AFR[pin / 8] &= ~AF_FIELD(pin);
+        port->AFR[pin / 8] |= AF(pin, cfg->af);
     }
 }

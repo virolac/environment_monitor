@@ -64,11 +64,11 @@ static void I2C_Stop(void);
 
 void I2C_Init(void)
 {
-	RCC->APBENR1 |= RCC_APBENR1_I2C1EN; /* Enable the I2C1 peripheral clock */
+    RCC->APBENR1 |= RCC_APBENR1_I2C1EN; /* Enable the I2C1 peripheral clock */
 
-	/* Select PCLK as the peripheral clock source */
-	RCC->CCIPR &= ~RCC_CCIPR_I2C1SEL;
-	RCC->CCIPR |= RCC_CCIPR_I2C1SEL_PCLK;
+    /* Select PCLK as the peripheral clock source */
+    RCC->CCIPR &= ~RCC_CCIPR_I2C1SEL;
+    RCC->CCIPR |= RCC_CCIPR_I2C1SEL_PCLK;
 
     I2C1->CR1 &= ~CR1_PE; /* Disable the I2C1 peripheral for configuration */
     I2C1->CR1 &= ~CR1_ANFOFF; /* Enable the analog noise filter */
@@ -82,11 +82,11 @@ void I2C_Init(void)
      * I2C1 clock source = PCLK
      */
     I2C1->TIMINGR =
-    	(3UL << TIMINGR_PRESC_SHIFT) |
-		(2UL << TIMINGR_SCLDEL_SHIFT) |
-		(1UL << TIMINGR_SDADEL_SHIFT) |
-		(14UL << TIMINGR_SCLH_SHIFT) |
-		(16UL << TIMINGR_SCLL_SHIFT);
+        (3UL << TIMINGR_PRESC_SHIFT) |
+        (2UL << TIMINGR_SCLDEL_SHIFT) |
+        (1UL << TIMINGR_SDADEL_SHIFT) |
+        (14UL << TIMINGR_SCLH_SHIFT) |
+        (16UL << TIMINGR_SCLL_SHIFT);
 
     I2C1->CR1 |= CR1_PE; /* Enable the I2C1 peripheral */
 }
@@ -161,14 +161,14 @@ I2C_Status I2C_Read(uint8_t address, uint8_t *buffer, uint8_t length)
     I2C_Status status = I2C_OK;
 
     for (int i = 0; i < length; i++) {
-    	/* Wait for RXDR to be non-empty */
-    	while ((I2C1->ISR & ISR_RXNE) == 0) {
-    		status = I2C_CheckErrors();
-    		if (status != I2C_OK)
-    			goto stop;
-    	}
+        /* Wait for RXDR to be non-empty */
+        while ((I2C1->ISR & ISR_RXNE) == 0) {
+            status = I2C_CheckErrors();
+            if (status != I2C_OK)
+                goto stop;
+        }
 
-    	buffer[i] = I2C1->RXDR & 0xFF;
+        buffer[i] = I2C1->RXDR & 0xFF;
     }
 
     /* Wait until transfer is complete */
