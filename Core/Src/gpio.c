@@ -6,15 +6,15 @@
  * CONSTANTS / MACROS *
  **********************/
 
-#define GPIO_2BIT_FIELD(pin) (0x3UL << (2UL * (pin)))
-#define GPIO_2BIT_SET(pin, value) ((uint32_t)(value) << (2UL * (pin)))
+#define GPIO_2BIT_FIELD(pin) (0x3U << (2U * (pin)))
+#define GPIO_2BIT_SET(pin, value) ((uint32_t)(value) << (2U * (pin)))
 
 #define OTYPER_SHIFT(pin) (pin)
-#define OTYPER_FIELD(pin) (1UL << OTYPER_SHIFT(pin))
+#define OTYPER_FIELD(pin) (1U << OTYPER_SHIFT(pin))
 #define OTYPER(pin, type) ((uint32_t)(type) << OTYPER_SHIFT(pin))
 
-#define AF_SHIFT(pin) (4UL * ((pin) % 8))
-#define AF_FIELD(pin) (0xFUL << AF_SHIFT(pin))
+#define AF_SHIFT(pin) (4U * ((pin) % 8))
+#define AF_FIELD(pin) (0xFU << AF_SHIFT(pin))
 #define AF(pin, af) ((uint32_t)(af) << AF_SHIFT(pin))
 
 /********************

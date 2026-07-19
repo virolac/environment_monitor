@@ -9,53 +9,58 @@
  * CONSTANTS / MACROS *
  **********************/
 
-#define RCC_CCIPR_I2C1SEL_SHIFT 12UL
-#define RCC_CCIPR_I2C1SEL_PCLK (0UL << RCC_CCIPR_I2C1SEL_SHIFT)
-#define RCC_CCIPR_I2C1SEL_SYSCLK (1UL << RCC_CCIPR_I2C1SEL_SHIFT)
-#define RCC_CCIPR_I2C1SEL_HSIKER (2UL << RCC_CCIPR_I2C1SEL_SHIFT)
+#define RCC_CCIPR_I2C1SEL_SHIFT 12U
+#define RCC_CCIPR_I2C1SEL_PCLK (0U << RCC_CCIPR_I2C1SEL_SHIFT)
+#define RCC_CCIPR_I2C1SEL_SYSCLK (1U << RCC_CCIPR_I2C1SEL_SHIFT)
+#define RCC_CCIPR_I2C1SEL_HSIKER (2U << RCC_CCIPR_I2C1SEL_SHIFT)
 
-#define CR1_PE (1UL << 0)
-#define CR1_DNF (0xFUL << 8)
-#define CR1_ANFOFF (1UL << 12)
+#define CR1_PE (1U << 0)
+#define CR1_DNF (0xFU << 8)
+#define CR1_ANFOFF (1U << 12)
 
-#define CR2_SADD_SHIFT 1UL
-#define CR2_SADD (0xFFUL << CR2_SADD_SHIFT)
-#define CR2_RD_WRN (1UL << 10)
-#define CR2_ADDR_MODE (1UL << 11)
-#define CR2_START (1UL << 13)
-#define CR2_STOP (1UL << 14)
-#define CR2_RELOAD (1UL << 24)
-#define CR2_AUTOEND (1UL << 25)
-#define CR2_NBYTES_SHIFT 16UL
-#define CR2_NBYTES (0xFFUL << CR2_NBYTES_SHIFT)
+#define CR2_SADD_SHIFT 1U
+#define CR2_SADD (0xFFU << CR2_SADD_SHIFT)
+#define CR2_RD_WRN (1U << 10)
+#define CR2_ADDR_MODE (1U << 11)
+#define CR2_START (1U << 13)
+#define CR2_STOP (1U << 14)
+#define CR2_RELOAD (1U << 24)
+#define CR2_AUTOEND (1U << 25)
+#define CR2_NBYTES_SHIFT 16U
+#define CR2_NBYTES (0xFFU << CR2_NBYTES_SHIFT)
 
-#define TIMINGR_SCLL_SHIFT 0UL
-#define TIMINGR_SCLH_SHIFT 8UL
-#define TIMINGR_SDADEL_SHIFT 16UL
-#define TIMINGR_SCLDEL_SHIFT 20UL
-#define TIMINGR_PRESC_SHIFT 28UL
+#define TIMINGR_SCLL_SHIFT 0U
+#define TIMINGR_SCLH_SHIFT 8U
+#define TIMINGR_SDADEL_SHIFT 16U
+#define TIMINGR_SCLDEL_SHIFT 20U
+#define TIMINGR_PRESC_SHIFT 28U
 
-#define ISR_TXIS (1UL << 1)
-#define ISR_RXNE (1UL << 2)
-#define ISR_NACKF (1UL << 4)
-#define ISR_STOPF (1UL << 5)
-#define ISR_TC (1UL << 6)
-#define ISR_BERR (1UL << 8)
-#define ISR_ARLO (1UL << 9)
-#define ISR_BUSY (1UL << 15)
+#define ISR_TXIS (1U << 1)
+#define ISR_RXNE (1U << 2)
+#define ISR_NACKF (1U << 4)
+#define ISR_STOPF (1U << 5)
+#define ISR_TC (1U << 6)
+#define ISR_TCR (1U << 7)
+#define ISR_BERR (1U << 8)
+#define ISR_ARLO (1U << 9)
+#define ISR_BUSY (1U << 15)
 
-#define ICR_NACKCF (1UL << 4)
-#define ICR_STOPCF (1UL << 5)
-#define ICR_BERRCF (1UL << 8)
-#define ICR_ARLOCF (1UL << 9)
+#define ICR_NACKCF (1U << 4)
+#define ICR_STOPCF (1U << 5)
+#define ICR_BERRCF (1U << 8)
+#define ICR_ARLOCF (1U << 9)
+
+#define REQUEST_NO_STARTSTOP 0x00000000U
+#define REQUEST_START_READ (CR2_START | CR2_RD_WRN)
+#define REQUEST_START_WRITE (CR2_START)
 
 /*************************
  * FUNCTION DECLARATIONS *
  *************************/
 
 static I2C_Status I2C_CheckErrors(void);
+static uint8_t I2C_ConfigTransferPhase(uint8_t address, size_t remaining, uint32_t request);
 static void I2C_WaitBusReady(void);
-static void I2C_Start(uint8_t address, uint8_t length, bool is_read);
 static void I2C_Stop(void);
 
 /********************
@@ -82,60 +87,80 @@ void I2C_Init(void)
      * I2C1 clock source = PCLK
      */
     I2C1->TIMINGR =
-        (3UL << TIMINGR_PRESC_SHIFT) |
-        (2UL << TIMINGR_SCLDEL_SHIFT) |
-        (1UL << TIMINGR_SDADEL_SHIFT) |
-        (14UL << TIMINGR_SCLH_SHIFT) |
-        (16UL << TIMINGR_SCLL_SHIFT);
+        (3U << TIMINGR_PRESC_SHIFT) |
+        (2U << TIMINGR_SCLDEL_SHIFT) |
+        (1U << TIMINGR_SDADEL_SHIFT) |
+        (14U << TIMINGR_SCLH_SHIFT) |
+        (16U << TIMINGR_SCLL_SHIFT);
 
     I2C1->CR1 |= CR1_PE; /* Enable the I2C1 peripheral */
 }
 
-I2C_Status I2C_Probe(uint8_t address)
+I2C_Status I2C_Read(uint8_t address, uint8_t *buffer, uint8_t length)
 {
-    I2C_WaitBusReady();
-    I2C_Start(address, 0, false);
+    I2C_RxBuffer i2c_buffer = {
+        .data = buffer,
+        .length = length,
+    };
 
-    I2C_Status status = I2C_OK;
-
-    /* Wait for ACK/NACK or error */
-    while ((I2C1->ISR & ISR_TXIS) == 0) {
-        status = I2C_CheckErrors();
-        if (status != I2C_OK)
-            goto stop;
-    }
-
-stop:
-    I2C_Stop();
-    return status;
-}
-
-I2C_Status I2C_WriteByte(uint8_t address, uint8_t byte)
-{
-    const uint8_t buffer[1] = { byte };
-
-    return I2C_Write(address, buffer, 1);
+    return I2C_Readv(address, &i2c_buffer, 1);
 }
 
 I2C_Status I2C_Write(uint8_t address, const uint8_t *buffer, uint8_t length)
 {
-    if (length == 0 || buffer == NULL)
+    I2C_TxBuffer i2c_buffer = {
+        .data = buffer,
+        .length = length,
+    };
+
+    return I2C_Writev(address, &i2c_buffer, 1);
+}
+
+I2C_Status I2C_Readv(uint8_t address, I2C_RxBuffer *buffers, size_t count)
+{
+    if (count == 0 || buffers == NULL)
         return I2C_INVALID_ARGUMENT;
 
+    size_t total_remaining = 0;
+    for (size_t i = 0; i < count; i++) {
+        if (buffers[i].length == 0 || buffers[i].data == NULL)
+            return I2C_INVALID_ARGUMENT;
+
+        total_remaining += buffers[i].length;
+    }
+
     I2C_WaitBusReady();
-    I2C_Start(address, length, false);
+    size_t chunk_remaining = I2C_ConfigTransferPhase(
+            address, total_remaining, REQUEST_START_READ);
 
     I2C_Status status = I2C_OK;
 
-    for (int i = 0; i < length; i++) {
-        /* Wait for TXDR to be empty */
-        while ((I2C1->ISR & ISR_TXIS) == 0) {
-            status = I2C_CheckErrors();
-            if (status != I2C_OK)
-                goto stop;
-        }
+    for (size_t i = 0; i < count; i++) {
+        for (size_t j = 0; j < buffers[i].length; j++) {
+            /* Wait for RXDR to be non-empty empty */
+            while ((I2C1->ISR & ISR_RXNE) == 0) {
+                status = I2C_CheckErrors();
+                if (status != I2C_OK)
+                    goto stop;
+            }
 
-        I2C1->TXDR = buffer[i]; /* Set byte to send */
+            buffers[i].data[j] = I2C1->RXDR & 0xFF;
+
+            total_remaining--;
+            chunk_remaining--;
+
+            if (chunk_remaining == 0 && total_remaining > 0) {
+                /* Wait for transfer complete reload */
+                while ((I2C1->ISR & ISR_TCR) == 0) {
+                    status = I2C_CheckErrors();
+                    if (status != I2C_OK)
+                        goto stop;
+                }
+
+                chunk_remaining = I2C_ConfigTransferPhase(
+                        address, total_remaining, REQUEST_NO_STARTSTOP);
+            }
+        }
     }
 
     /* Wait until transfer is complete */
@@ -150,25 +175,52 @@ stop:
     return status;
 }
 
-I2C_Status I2C_Read(uint8_t address, uint8_t *buffer, uint8_t length)
+I2C_Status I2C_Writev(uint8_t address, const I2C_TxBuffer *buffers, size_t count)
 {
-    if (length == 0 || buffer == NULL)
+    if (count == 0 || buffers == NULL)
         return I2C_INVALID_ARGUMENT;
 
+    size_t total_remaining = 0;
+    for (size_t i = 0; i < count; i++) {
+        if (buffers[i].length == 0 || buffers[i].data == NULL)
+            return I2C_INVALID_ARGUMENT;
+
+        total_remaining += buffers[i].length;
+    }
+
+
     I2C_WaitBusReady();
-    I2C_Start(address, length, true);
+    size_t chunk_remaining = I2C_ConfigTransferPhase(
+            address, total_remaining, REQUEST_START_WRITE);
 
     I2C_Status status = I2C_OK;
 
-    for (int i = 0; i < length; i++) {
-        /* Wait for RXDR to be non-empty */
-        while ((I2C1->ISR & ISR_RXNE) == 0) {
-            status = I2C_CheckErrors();
-            if (status != I2C_OK)
-                goto stop;
-        }
+    for (size_t i = 0; i < count; i++) {
+        for (size_t j = 0; j < buffers[i].length; j++) {
+            /* Wait for TXDR to be empty */
+            while ((I2C1->ISR & ISR_TXIS) == 0) {
+                status = I2C_CheckErrors();
+                if (status != I2C_OK)
+                    goto stop;
+            }
 
-        buffer[i] = I2C1->RXDR & 0xFF;
+            I2C1->TXDR = buffers[i].data[j]; /* Set byte to send */
+
+            total_remaining--;
+            chunk_remaining--;
+
+            if (chunk_remaining == 0 && total_remaining > 0) {
+                /* Wait for transfer complete reload */
+                while ((I2C1->ISR & ISR_TCR) == 0) {
+                    status = I2C_CheckErrors();
+                    if (status != I2C_OK)
+                        goto stop;
+                }
+
+                chunk_remaining = I2C_ConfigTransferPhase(
+                        address, total_remaining, REQUEST_NO_STARTSTOP);
+            }
+        }
     }
 
     /* Wait until transfer is complete */
@@ -203,33 +255,39 @@ static I2C_Status I2C_CheckErrors(void)
     }
 }
 
+static uint8_t I2C_ConfigTransferPhase(uint8_t address, size_t remaining, uint32_t request)
+{
+    uint32_t cr2_value = I2C1->CR2;
+
+    cr2_value &= (uint32_t)~(CR2_NBYTES | CR2_AUTOEND | CR2_RELOAD | CR2_STOP |
+                             CR2_START | CR2_ADDR_MODE | CR2_RD_WRN | CR2_SADD);
+
+    /* Set target address */
+    cr2_value |= ((uint32_t)address << CR2_SADD_SHIFT) & CR2_SADD;
+
+    uint8_t chunk;
+    if (remaining > 255) {
+        chunk = 255;
+        cr2_value |= CR2_RELOAD;
+    } else {
+        chunk = (uint8_t)remaining;
+    }
+
+    /* Set number of bytes to transfer */
+    cr2_value |= ((uint32_t)chunk << CR2_NBYTES_SHIFT) & CR2_NBYTES;
+
+    cr2_value |= (uint32_t)request;
+
+    I2C1->CR2 = cr2_value;
+
+    return chunk;
+}
+
 static void I2C_WaitBusReady(void)
 {
     while (I2C1->ISR & ISR_BUSY) {
         /* Wait while the bus is busy */
     }
-}
-
-static void I2C_Start(uint8_t address, uint8_t length, bool is_read)
-{
-    I2C1->CR2 &= ~CR2_RELOAD; /* Clear RELOAD; only handle transfer sizes <= 255 */
-    I2C1->CR2 &= ~CR2_AUTOEND; /* Don't send STOP bit automatically */
-    I2C1->CR2 &= ~CR2_ADDR_MODE; /* Use 7-bit addressing mode */
-
-    /* Set target address */
-    I2C1->CR2 &= ~CR2_SADD;
-    I2C1->CR2 |= ((uint32_t)address << CR2_SADD_SHIFT) & CR2_SADD;
-
-    /* Set number of bytes to transfer */
-    I2C1->CR2 &= ~CR2_NBYTES;
-    I2C1->CR2 |= ((uint32_t)length << CR2_NBYTES_SHIFT) & CR2_NBYTES;
-
-    if (is_read)
-        I2C1->CR2 |= CR2_RD_WRN; /* Request a read transfer */
-    else
-        I2C1->CR2 &= ~CR2_RD_WRN; /* Request a write transfer */
-
-    I2C1->CR2 |= CR2_START; /* Start the transfer and begin address phase */
 }
 
 static void I2C_Stop(void)
