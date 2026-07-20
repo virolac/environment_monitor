@@ -201,6 +201,33 @@ void SSD1306_DrawRectangle(uint8_t x, uint8_t y, uint8_t width, uint8_t height)
     SSD1306_DrawLine(x, y, x, bottom); /* Left */
 }
 
+void SSD1306_DrawCircle(uint8_t cx, uint8_t cy, uint8_t radius)
+{
+    int x = 0;
+    int y = -radius; /* Start with the top of the circle */
+    int p = -radius;
+
+    while (x < -y) {
+        if (p > 0) {
+            y++;
+            p += 2*(x + y) + 1;
+        } else {
+            p += 2*x + 1;
+        }
+
+        SSD1306_DrawPixel(cx + x, cy + y, true);
+        SSD1306_DrawPixel(cx - x, cy + y, true);
+        SSD1306_DrawPixel(cx + x, cy - y, true);
+        SSD1306_DrawPixel(cx - x, cy - y, true);
+        SSD1306_DrawPixel(cx + y, cy + x, true);
+        SSD1306_DrawPixel(cx + y, cy - x, true);
+        SSD1306_DrawPixel(cx - y, cy + x, true);
+        SSD1306_DrawPixel(cx - y, cy - x, true);
+
+        x++;
+    }
+}
+
 /*********************
  * PRIVATE INTERFACE *
  *********************/

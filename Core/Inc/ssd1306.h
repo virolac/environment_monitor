@@ -145,4 +145,22 @@ void SSD1306_DrawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1);
  */
 void SSD1306_DrawRectangle(uint8_t x, uint8_t y, uint8_t width, uint8_t height);
 
+/**
+ * @brief Draws a circle on the display buffer.
+ *
+ * Draws an outlined circle using the specified center point and radius.
+ * The circle is drawn symmetrically around the center coordinates.
+ *
+ * Coordinates are relative to the display origin, where (0, 0) is the
+ * top-left corner of the display.
+ *
+ * @note This function only modifies the framebuffer. Call SSD1306_Update() to
+ *       transfer the framebuffer contents to the display.
+ *
+ * @param cx X coordinate of the circle center.
+ * @param cy Y coordinate of the circle center.
+ * @param radius Radius of the circle in pixels.
+ */
+void SSD1306_DrawCircle(uint8_t cx, uint8_t cy, uint8_t radius);
+
 #endif

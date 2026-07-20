@@ -30,16 +30,13 @@ int main(void)
             for (uint8_t row = 0; row < height; row++) {
                 SSD1306_Clear();
 
-                /* Outer border */
-                SSD1306_DrawRectangle(0, 0, 128, 64);
-
-                /* Nested rectangles */
-                SSD1306_DrawRectangle(8, 8, 112, 48);
-                SSD1306_DrawRectangle(16, 16, 96, 32);
-                SSD1306_DrawRectangle(24, 24, 80, 16);
-
-                /* Small center rectangle */
-                SSD1306_DrawRectangle(56, 28, 16, 8);
+                SSD1306_DrawCircle(64, 32, 4);
+                SSD1306_DrawCircle(64, 32, 8);
+                SSD1306_DrawCircle(64, 32, 12);
+                SSD1306_DrawCircle(64, 32, 16);
+                SSD1306_DrawCircle(64, 32, 20);
+                SSD1306_DrawCircle(64, 32, 24);
+                SSD1306_DrawCircle(64, 32, 28);
 
                 SSD1306_Update();
             }
