@@ -244,6 +244,16 @@ void SSD1306_DrawChar(uint8_t x, uint8_t y, char c)
     }
 }
 
+void SSD1306_DrawString(uint8_t x, uint8_t y, const char *str)
+{
+    while (*str) {
+        SSD1306_DrawChar(x, y, *str);
+
+        x += FONT5X7_WIDTH + 1; /* 1 column spacing */
+        str++;
+    }
+}
+
 /*********************
  * PRIVATE INTERFACE *
  *********************/

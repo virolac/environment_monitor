@@ -30,23 +30,11 @@ int main(void)
             for (uint8_t row = 0; row < height; row++) {
                 SSD1306_Clear();
 
-                /* Top-left */
-                SSD1306_DrawChar(0, 0, 'A');
+                SSD1306_DrawString(0, 0, "Hello");
+                SSD1306_DrawString(0, 12, "World!");
 
-                /* Top-right */
-                SSD1306_DrawChar(120, 0, 'B');
-
-                /* Center */
-                SSD1306_DrawChar(62, 28, 'C');
-
-                /* Bottom-left */
-                SSD1306_DrawChar(0, 56, 'X');
-
-                /* A few visually distinct characters */
-                SSD1306_DrawChar(20, 20, '0');
-                SSD1306_DrawChar(30, 20, '8');
-                SSD1306_DrawChar(40, 20, '@');
-                SSD1306_DrawChar(50, 20, '#');
+                SSD1306_DrawString(0, 28, "0123456789");
+                SSD1306_DrawString(0, 40, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 
                 SSD1306_Update();
             }

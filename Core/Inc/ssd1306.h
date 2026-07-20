@@ -180,4 +180,22 @@ void SSD1306_DrawCircle(uint8_t cx, uint8_t cy, uint8_t radius);
  */
 void SSD1306_DrawChar(uint8_t x, uint8_t y, char c);
 
+/**
+ * @brief Draws a null-terminated string on the display.
+ *
+ * Each character is rendered sequentially from left to right using the
+ * configured bitmap font. A single pixel column is left between characters
+ * for spacing.
+ *
+ * Characters outside the supported font range are rendered as '?'.
+ *
+ * The caller is responsible for ensuring that the string fits within the
+ * display boundaries.
+ *
+ * @param x Horizontal coordinate of the string's top-left corner.
+ * @param y Vertical coordinate of the string's top-left corner.
+ * @param str Null-terminated string to render.
+ */
+void SSD1306_DrawString(uint8_t x, uint8_t y, const char *str);
+
 #endif
