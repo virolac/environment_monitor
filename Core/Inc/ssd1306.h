@@ -163,4 +163,21 @@ void SSD1306_DrawRectangle(uint8_t x, uint8_t y, uint8_t width, uint8_t height);
  */
 void SSD1306_DrawCircle(uint8_t cx, uint8_t cy, uint8_t radius);
 
+/**
+ * @brief Draws a single character on the display.
+ *
+ * The character is rendered using the active bitmap font.
+ * The coordinates specify the top-left corner of the character area.
+ *
+ * Characters outside the supported font range are rendered as '?'.
+ *
+ * The caller is responsible for ensuring that the character fits within
+ * the display boundaries.
+ *
+ * @param x Horizontal coordinate of the character's top-left corner.
+ * @param y Vertical coordinate of the character's top-left corner.
+ * @param c Character to render.
+ */
+void SSD1306_DrawChar(uint8_t x, uint8_t y, char c);
+
 #endif

@@ -30,13 +30,23 @@ int main(void)
             for (uint8_t row = 0; row < height; row++) {
                 SSD1306_Clear();
 
-                SSD1306_DrawCircle(64, 32, 4);
-                SSD1306_DrawCircle(64, 32, 8);
-                SSD1306_DrawCircle(64, 32, 12);
-                SSD1306_DrawCircle(64, 32, 16);
-                SSD1306_DrawCircle(64, 32, 20);
-                SSD1306_DrawCircle(64, 32, 24);
-                SSD1306_DrawCircle(64, 32, 28);
+                /* Top-left */
+                SSD1306_DrawChar(0, 0, 'A');
+
+                /* Top-right */
+                SSD1306_DrawChar(120, 0, 'B');
+
+                /* Center */
+                SSD1306_DrawChar(62, 28, 'C');
+
+                /* Bottom-left */
+                SSD1306_DrawChar(0, 56, 'X');
+
+                /* A few visually distinct characters */
+                SSD1306_DrawChar(20, 20, '0');
+                SSD1306_DrawChar(30, 20, '8');
+                SSD1306_DrawChar(40, 20, '@');
+                SSD1306_DrawChar(50, 20, '#');
 
                 SSD1306_Update();
             }

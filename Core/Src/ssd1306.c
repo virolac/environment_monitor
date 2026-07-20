@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "font5x7.h"
 #include "i2c.h"
 #include "ssd1306.h"
 
@@ -225,6 +226,21 @@ void SSD1306_DrawCircle(uint8_t cx, uint8_t cy, uint8_t radius)
         SSD1306_DrawPixel(cx - y, cy - x, true);
 
         x++;
+    }
+}
+
+void SSD1306_DrawChar(uint8_t x, uint8_t y, char c)
+{
+    const uint8_t *glyph = Font5x7_GetGlyph(c);
+
+    for (uint8_t col = 0; col < FONT5X7_WIDTH; col++) {
+        uint8_t column_data = glyph[col];
+
+        for (uint8_t row = 0; row < FONT5X7_HEIGHT; row++) {
+            if (column_data & (1U << row)) {
+                SSD1306_DrawPixel(x + col, y + row, true);
+            }
+        }
     }
 }
 
