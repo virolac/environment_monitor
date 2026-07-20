@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <string.h>
 
 #include "i2c.h"
@@ -116,6 +117,13 @@ SSD1306_Status SSD1306_DisplayOff(void)
     return SSD1306_SendCommands(&cmd, sizeof(cmd));
 }
 
+SSD1306_Status SSD1306_SetContrast(uint8_t contrast)
+{
+    const uint8_t cmd[] = { CMD_SET_CONTRAST, contrast };
+
+    return SSD1306_SendCommands(cmd, 2);
+}
+
 void SSD1306_Clear(void)
 {
     memset(framebuffer, 0, sizeof(framebuffer));
@@ -150,11 +158,36 @@ void SSD1306_DrawPixel(uint8_t x, uint8_t y, bool on)
         FB(page, x) &= ~pixel_mask;
 }
 
-SSD1306_Status SSD1306_SetContrast(uint8_t contrast)
+void SSD1306_DrawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1)
 {
-    const uint8_t cmd[] = { CMD_SET_CONTRAST, contrast };
+    int dx = abs(x1 - x0);
+    int sx = x0 < x1 ? 1 : -1;
 
-    return SSD1306_SendCommands(cmd, 2);
+    int dy = -abs(y1 - y0);
+    int sy = y0 < y1 ? 1 : -1;
+
+    int err = dx + dy;
+
+    int x = x0;
+    int y = y0;
+
+    while (true) {
+        SSD1306_DrawPixel(x, y, true);
+
+        if (x == x1 && y == y1) break;
+
+        int e2 = 2 * err;
+
+        if (e2 >= dy) {
+            err += dy;
+            x += sx;
+        }
+
+        if (e2 <= dx) {
+            err += dx;
+            y += sy;
+        }
+    }
 }
 
 /*********************

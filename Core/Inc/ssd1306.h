@@ -64,6 +64,18 @@ SSD1306_Status SSD1306_DisplayOn(void);
 SSD1306_Status SSD1306_DisplayOff(void);
 
 /**
+ * @brief Set the display contrast.
+ *
+ * Adjusts the OLED brightness by changing the SSD1306 contrast
+ * control register.
+ *
+ * @param contrast Contrast value in the range 0-255.
+ *
+ * @return SSD1306_OK on success, error code otherwise.
+ */
+SSD1306_Status SSD1306_SetContrast(uint8_t contrast);
+
+/**
  * @brief Clear the internal display buffer.
  *
  * Sets all pixels in the software framebuffer to the OFF state.
@@ -94,15 +106,23 @@ SSD1306_Status SSD1306_Update(void);
 void SSD1306_DrawPixel(uint8_t x, uint8_t y, bool on);
 
 /**
- * @brief Set the display contrast.
+ * @brief Draws a line between two points on the display buffer.
  *
- * Adjusts the OLED brightness by changing the SSD1306 contrast
- * control register.
+ * Uses Bresenham's line algorithm to draw a straight line between the
+ * specified coordinates. The line includes both the starting and ending
+ * points.
  *
- * @param contrast Contrast value in the range 0-255.
+ * Coordinates are relative to the display origin, where (0, 0) is the
+ * top-left corner of the display.
  *
- * @return SSD1306_OK on success, error code otherwise.
+ * @note This function only modifies the framebuffer. Call SSD1306_Update()
+ *       to transfer the buffer contents to the display.
+ *
+ * @param x0 X coordinate of the starting point.
+ * @param y0 Y coordinate of the starting point.
+ * @param x1 X coordinate of the ending point.
+ * @param y1 Y coordinate of the ending point.
  */
-SSD1306_Status SSD1306_SetContrast(uint8_t contrast);
+void SSD1306_DrawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1);
 
 #endif
