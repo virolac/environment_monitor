@@ -1,5 +1,6 @@
 #include "gpio.h"
 #include "i2c.h"
+#include "ssd1306.h"
 
 int main(void)
 {
@@ -19,9 +20,19 @@ int main(void)
     GPIO_Init(GPIOA, 10, &sda);
 
     I2C_Init();
-    I2C_Probe(0x3C);
+    SSD1306_Init();
+
+    uint8_t width = SSD1306_GetWidth();
+    uint8_t height = SSD1306_GetHeight();
 
     while (1) {
+        for (uint8_t col = 0; col < width; col++) {
+            for (uint8_t row = 0; row < height; row++) {
+                SSD1306_Clear();
+                SSD1306_DrawPixel(col, row, true);
+                SSD1306_Update();
+            }
+        }
     }
 
     return 0;
