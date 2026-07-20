@@ -25,39 +25,21 @@ int main(void)
     uint8_t width = SSD1306_GetWidth();
     uint8_t height = SSD1306_GetHeight();
 
-    uint8_t cx = width / 2;
-    uint8_t cy = height / 2;
-
     while (1) {
         for (uint8_t col = 0; col < width; col++) {
             for (uint8_t row = 0; row < height; row++) {
                 SSD1306_Clear();
 
-                /* Horizontal */
-                SSD1306_DrawLine(cx, cy, 127, cy);
-                SSD1306_DrawLine(cx, cy,   0, cy);
+                /* Outer border */
+                SSD1306_DrawRectangle(0, 0, 128, 64);
 
-                /* Vertical */
-                SSD1306_DrawLine(cx, cy, cx,   0);
-                SSD1306_DrawLine(cx, cy, cx,  63);
+                /* Nested rectangles */
+                SSD1306_DrawRectangle(8, 8, 112, 48);
+                SSD1306_DrawRectangle(16, 16, 96, 32);
+                SSD1306_DrawRectangle(24, 24, 80, 16);
 
-                /* Diagonals (45°) */
-                SSD1306_DrawLine(cx, cy, 127, 63);
-                SSD1306_DrawLine(cx, cy, 127,  0);
-                SSD1306_DrawLine(cx, cy,   0, 63);
-                SSD1306_DrawLine(cx, cy,   0,  0);
-
-                /* Shallow slopes */
-                SSD1306_DrawLine(cx, cy, 127, 48);
-                SSD1306_DrawLine(cx, cy, 127, 16);
-                SSD1306_DrawLine(cx, cy,   0, 48);
-                SSD1306_DrawLine(cx, cy,   0, 16);
-
-                /* Steep slopes */
-                SSD1306_DrawLine(cx, cy,  80, 63);
-                SSD1306_DrawLine(cx, cy,  80,  0);
-                SSD1306_DrawLine(cx, cy,  48, 63);
-                SSD1306_DrawLine(cx, cy,  48,  0);
+                /* Small center rectangle */
+                SSD1306_DrawRectangle(56, 28, 16, 8);
 
                 SSD1306_Update();
             }

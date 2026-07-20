@@ -190,6 +190,17 @@ void SSD1306_DrawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1)
     }
 }
 
+void SSD1306_DrawRectangle(uint8_t x, uint8_t y, uint8_t width, uint8_t height)
+{
+    int right = x + width - 1;
+    int bottom = y + height - 1;
+
+    SSD1306_DrawLine(x, y, right, y); /* Top */
+    SSD1306_DrawLine(right, y, right, bottom); /* Right */
+    SSD1306_DrawLine(x, bottom, right, bottom); /* Bottom */
+    SSD1306_DrawLine(x, y, x, bottom); /* Left */
+}
+
 /*********************
  * PRIVATE INTERFACE *
  *********************/

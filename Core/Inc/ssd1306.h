@@ -125,4 +125,24 @@ void SSD1306_DrawPixel(uint8_t x, uint8_t y, bool on);
  */
 void SSD1306_DrawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1);
 
+/**
+ * @brief Draws an outlined rectangle on the display buffer.
+ *
+ * Draws a rectangle with the specified top-left corner, width, and height.
+ * The rectangle includes its border pixels and does not modify pixels inside
+ * the rectangle.
+ *
+ * Coordinates are relative to the display origin, where (0, 0) is the
+ * top-left corner of the display.
+ *
+ * @note This function only modifies the framebuffer. Call SSD1306_Update() to
+ *       transfer the framebuffer contents to the display.
+ *
+ * @param x X coordinate of the rectangle's top-left corner.
+ * @param y Y coordinate of the rectangle's top-left corner.
+ * @param width Width of the rectangle in pixels.
+ * @param height Height of the rectangle in pixels.
+ */
+void SSD1306_DrawRectangle(uint8_t x, uint8_t y, uint8_t width, uint8_t height);
+
 #endif
