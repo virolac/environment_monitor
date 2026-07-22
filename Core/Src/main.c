@@ -2,6 +2,13 @@
 #include "i2c.h"
 #include "ssd1306.h"
 
+static void Delay(volatile uint32_t count)
+{
+    while (count--) {
+        __asm volatile ("nop");
+    }
+}
+
 int main(void)
 {
     GPIO_EnableClock(GPIOA);
@@ -22,16 +29,33 @@ int main(void)
     I2C_Init();
     SSD1306_Init();
 
+    SSD1306_Clear();
+
+    SSD1306_DrawString(0, 0,  "Page 0");
+    SSD1306_DrawString(0, 8,  "Page 1");
+    SSD1306_DrawString(0, 16, "Page 2");
+    SSD1306_DrawString(0, 24, "Page 3");
+    SSD1306_DrawString(0, 32, "Page 4");
+    SSD1306_DrawString(0, 40, "Page 5");
+    SSD1306_DrawString(0, 48, "Page 6");
+    SSD1306_DrawString(0, 56, "Page 7");
+
+    SSD1306_Update();
+
+    Delay(5000000);
+
+    SSD1306_StartHorizontalScroll(
+        SSD1306_SCROLL_RIGHT,
+        SSD1306_SCROLL_INTERVAL_5_FRAMES,
+        2,
+        5
+    );
+
+    Delay(5000000);
+
+    SSD1306_StopScroll();
+
     while (1) {
-        SSD1306_Clear();
-
-        SSD1306_DrawString(0, 0, "Hello");
-        SSD1306_DrawString(0, 12, "World!");
-
-        SSD1306_DrawString(0, 28, "0123456789");
-        SSD1306_DrawString(0, 40, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-
-        SSD1306_Update();
     }
 
     return 0;

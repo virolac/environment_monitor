@@ -4,10 +4,14 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-typedef enum {
-    SSD1306_OK,
-    SSD1306_I2C_ERROR,
-    SSD1306_INVALID_ARGUMENT,
+/**
+ * @brief Status codes returned by SSD1306 driver functions.
+ */
+typedef enum
+{
+    SSD1306_OK = 0, /**< Operation completed successfully. */
+    SSD1306_INVALID_ARGUMENT, /**< One or more function arguments are invalid. */
+    SSD1306_I2C_ERROR, /**< Communication with the display failed. */
 } SSD1306_Status;
 
 /**
@@ -197,5 +201,68 @@ void SSD1306_DrawChar(uint8_t x, uint8_t y, char c);
  * @param str Null-terminated string to render.
  */
 void SSD1306_DrawString(uint8_t x, uint8_t y, const char *str);
+
+/**
+ * @brief Horizontal scrolling direction.
+ *
+ * Corresponds to the SSD1306 horizontal scroll commands.
+ */
+typedef enum {
+    SSD1306_SCROLL_RIGHT = 0x26, /**< Scroll right. */
+    SSD1306_SCROLL_LEFT  = 0x27, /**< Scroll left. */
+} SSD1306_HorizontalScrollDirection;
+
+/**
+ * @brief Scroll interval between successive scroll steps.
+ *
+ * The enumeration values correspond directly to the SSD1306 command
+ * encodings rather than the frame interval itself.
+ */
+typedef enum {
+    SSD1306_SCROLL_INTERVAL_5_FRAMES   = 0x00, /**< Scroll every 5 frames. */
+    SSD1306_SCROLL_INTERVAL_64_FRAMES  = 0x01, /**< Scroll every 64 frames. */
+    SSD1306_SCROLL_INTERVAL_128_FRAMES = 0x02, /**< Scroll every 128 frames. */
+    SSD1306_SCROLL_INTERVAL_256_FRAMES = 0x03, /**< Scroll every 256 frames. */
+    SSD1306_SCROLL_INTERVAL_3_FRAMES   = 0x04, /**< Scroll every 3 frames. */
+    SSD1306_SCROLL_INTERVAL_4_FRAMES   = 0x05, /**< Scroll every 4 frames. */
+    SSD1306_SCROLL_INTERVAL_25_FRAMES  = 0x06, /**< Scroll every 25 frames. */
+    SSD1306_SCROLL_INTERVAL_2_FRAMES   = 0x07, /**< Scroll every 2 frames. */
+} SSD1306_ScrollInterval;
+
+/**
+ * @brief Starts automatic horizontal scrolling.
+ *
+ * Activates continuous hardware scrolling between the specified page range.
+ *
+ * @note Hardware scrolling must be deactivated with SSD1306_StopScroll() before calling
+ *       this function if scrolling is already active.
+ *
+ * @param direction Scroll direction.
+ * @param interval Number of display frames between scroll steps.
+ * @param start_page First page to scroll.
+ * @param end_page Last page to scroll (inclusive).
+ *
+ * @return
+ * - ::SSD1306_OK on success.
+ * - ::SSD1306_INVALID_ARGUMENT if any argument is invalid.
+ * - Any error returned by the underlying I²C driver.
+ */
+SSD1306_Status SSD1306_StartHorizontalScroll(
+    SSD1306_HorizontalScrollDirection direction,
+    SSD1306_ScrollInterval interval,
+    uint8_t start_page,
+    uint8_t end_page
+);
+
+/**
+ * @brief Stops automatic hardware scrolling.
+ *
+ * Deactivates any active hardware scrolling operation.
+ *
+ * @return
+ * - ::SSD1306_OK on success.
+ * - Any error returned by the underlying I²C driver.
+ */
+SSD1306_Status SSD1306_StopScroll(void);
 
 #endif

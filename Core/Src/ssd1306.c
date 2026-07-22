@@ -7,8 +7,8 @@
 
 #define NUM_SEGMENTS 128U
 #define NUM_COMMONS 64U
-#define NUM_PAGES 8U
 #define PAGE_HEIGHT 8U
+#define NUM_PAGES (NUM_COMMONS / PAGE_HEIGHT)
 #define FRAMEBUFFER_SIZE (NUM_PAGES * NUM_SEGMENTS)
 
 #define DEVICE_ADDRESS 0x3CU
@@ -24,30 +24,32 @@
  * COMMANDS *
  ************/
 
-#define CMD_SET_DISPLAY_START_LINE 0x40
-#define CMD_SET_DISPLAY_OFFSET 0xD3
-#define CMD_SET_SEGMENT_REMAP_NORMAL 0xA0
-#define CMD_SET_SEGMENT_REMAP_FLIPPED 0xA1
-#define CMD_SET_COM_SCAN_NORMAL 0xC0
-#define CMD_SET_COM_SCAN_FLIPPED 0xC8
-#define CMD_SET_COM_PINS 0xDA
-#define COM_PIN_SEQUENTIAL_CONFIG 0x02
-#define COM_PIN_ALTERNATIVE_CONFIG 0x12
-#define CMD_DISPLAY_ALL_ON_RESUME 0xA4
-#define CMD_NORMAL_DISPLAY 0xA6
-#define CMD_SET_DISPLAY_CLK_DIV 0xD5
-#define CMD_DISPLAY_OFF 0xAE
-#define CMD_DISPLAY_ON 0xAF
-#define CMD_SET_CONTRAST 0x81
-#define CMD_CHARGE_PUMP 0x8D
-#define CHARGE_PUMP_ENABLE 0x14
-#define CMD_SET_MUX_RATIO 0xA8
-#define CMD_SET_MEMORY_ADDRESSING_MODE 0x20
-#define HORIZONTAL_ADDRESSING_MODE 0x00
-#define VERTICAL_ADDRESSING_MODE 0x01
-#define PAGE_ADDRESSING_MODE 0x02
-#define CMD_SET_COLUMN_ADDRESS 0x21
-#define CMD_SET_PAGE_ADDRESS 0x22
+#define CMD_SET_DISPLAY_START_LINE 0x40U
+#define CMD_SET_DISPLAY_OFFSET 0xD3U
+#define CMD_SET_SEGMENT_REMAP_NORMAL 0xA0U
+#define CMD_SET_SEGMENT_REMAP_FLIPPED 0xA1U
+#define CMD_SET_COM_SCAN_NORMAL 0xC0U
+#define CMD_SET_COM_SCAN_FLIPPED 0xC8U
+#define CMD_SET_COM_PINS 0xDAU
+#define COM_PIN_SEQUENTIAL_CONFIG 0x02U
+#define COM_PIN_ALTERNATIVE_CONFIG 0x12U
+#define CMD_DISPLAY_ALL_ON_RESUME 0xA4U
+#define CMD_NORMAL_DISPLAY 0xA6U
+#define CMD_SET_DISPLAY_CLK_DIV 0xD5U
+#define CMD_DISPLAY_OFF 0xAEU
+#define CMD_DISPLAY_ON 0xAFU
+#define CMD_SET_CONTRAST 0x81U
+#define CMD_CHARGE_PUMP 0x8DU
+#define CHARGE_PUMP_ENABLE 0x14U
+#define CMD_SET_MUX_RATIO 0xA8U
+#define CMD_SET_MEMORY_ADDRESSING_MODE 0x20U
+#define HORIZONTAL_ADDRESSING_MODE 0x00U
+#define VERTICAL_ADDRESSING_MODE 0x01U
+#define PAGE_ADDRESSING_MODE 0x02U
+#define CMD_SET_COLUMN_ADDRESS 0x21U
+#define CMD_SET_PAGE_ADDRESS 0x22U
+#define CMD_DEACTIVATE_SCROLL 0x2EU
+#define CMD_ACTIVATE_SCROLL 0x2FU
 
 /**********
  * MACROS *
@@ -252,6 +254,37 @@ void SSD1306_DrawString(uint8_t x, uint8_t y, const char *str)
         x += FONT5X7_WIDTH + 1; /* 1 column spacing */
         str++;
     }
+}
+
+SSD1306_Status SSD1306_StartHorizontalScroll(
+    SSD1306_HorizontalScrollDirection direction,
+    SSD1306_ScrollInterval interval,
+    uint8_t start_page,
+    uint8_t end_page
+)
+{
+    if (start_page >= NUM_PAGES || end_page >= NUM_PAGES || start_page > end_page)
+        return SSD1306_INVALID_ARGUMENT;
+
+    const uint8_t cmds[] = {
+        direction,
+        0x00, /* Dummy byte */
+        start_page,
+        interval,
+        end_page,
+        0x00, /* Dummy byte */
+        0xFF, /* Dummy byte */
+        CMD_ACTIVATE_SCROLL,
+    };
+
+    return SSD1306_SendCommands(cmds, 8);
+}
+
+SSD1306_Status SSD1306_StopScroll(void)
+{
+    const uint8_t cmd[] = { CMD_DEACTIVATE_SCROLL };
+
+    return SSD1306_SendCommands(cmd, 1);
 }
 
 /*********************
