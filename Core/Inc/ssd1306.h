@@ -5,6 +5,33 @@
 #include <stdbool.h>
 
 /**
+ * @brief Number of display segments (columns) supported by the SSD1306.
+ *
+ * Each segment corresponds to one horizontal pixel position.
+ */
+#define SSD1306_NUM_SEGMENTS 128U
+
+/**
+ * @brief Number of COM outputs (rows) supported by the SSD1306.
+ *
+ * Each COM output corresponds to one vertical pixel position.
+ */
+#define SSD1306_NUM_COMMONS 64U
+
+/**
+ * @brief Number of pixels contained in one SSD1306 page.
+ *
+ * The SSD1306 memory is organized into pages, where each page contains
+ * one bit for each vertical position within the page.
+ */
+#define SSD1306_PAGE_HEIGHT 8U
+
+/**
+ * @brief Number of memory pages in the display RAM.
+ */
+#define SSD1306_NUM_PAGES (SSD1306_NUM_COMMONS / SSD1306_PAGE_HEIGHT)
+
+/**
  * @brief Status codes returned by SSD1306 driver functions.
  */
 typedef enum
@@ -26,24 +53,6 @@ typedef enum
  * @return SSD1306_OK on success, error code otherwise.
  */
 SSD1306_Status SSD1306_Init(void);
-
-/**
- * @brief Gets the width of the display in pixels.
- *
- * Returns the number of horizontal pixels available on the display.
- *
- * @return The display width in pixels.
- */
-uint8_t SSD1306_GetWidth(void);
-
-/**
- * @brief Gets the height of the display in pixels.
- *
- * Returns the number of vertical pixels available on the display.
- *
- * @return The display height in pixels.
- */
-uint8_t SSD1306_GetHeight(void);
 
 /**
  * @brief Turn the OLED display on.

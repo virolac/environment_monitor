@@ -5,11 +5,7 @@
 #include "i2c.h"
 #include "ssd1306.h"
 
-#define NUM_SEGMENTS 128U
-#define NUM_COMMONS 64U
-#define PAGE_HEIGHT 8U
-#define NUM_PAGES (NUM_COMMONS / PAGE_HEIGHT)
-#define FRAMEBUFFER_SIZE (NUM_PAGES * NUM_SEGMENTS)
+#define FRAMEBUFFER_SIZE (SSD1306_NUM_PAGES * SSD1306_NUM_SEGMENTS)
 
 #define DEVICE_ADDRESS 0x3CU
 
@@ -56,7 +52,7 @@
  **********/
 
 #define FB(page, segment) \
-    (framebuffer[(page) * NUM_SEGMENTS + (segment)])
+    (framebuffer[(page) * SSD1306_NUM_SEGMENTS + (segment)])
 
 /********************
  * GLOBAL VARIABLES *
@@ -96,16 +92,6 @@ SSD1306_Status SSD1306_Init(void)
     return SSD1306_SendCommands(init_sequence, sizeof(init_sequence));
 }
 
-uint8_t SSD1306_GetWidth(void)
-{
-    return NUM_SEGMENTS;
-}
-
-uint8_t SSD1306_GetHeight(void)
-{
-    return NUM_COMMONS;
-}
-
 SSD1306_Status SSD1306_DisplayOn(void)
 {
     static const uint8_t cmd = CMD_DISPLAY_ON;
@@ -136,8 +122,8 @@ SSD1306_Status SSD1306_Update(void)
 {
     static const uint8_t addressing_mode[] = {
         CMD_SET_MEMORY_ADDRESSING_MODE, HORIZONTAL_ADDRESSING_MODE,
-        CMD_SET_COLUMN_ADDRESS, 0x00, NUM_SEGMENTS - 1,
-        CMD_SET_PAGE_ADDRESS, 0x00, NUM_PAGES - 1,
+        CMD_SET_COLUMN_ADDRESS, 0x00, SSD1306_NUM_SEGMENTS - 1,
+        CMD_SET_PAGE_ADDRESS, 0x00, SSD1306_NUM_PAGES - 1,
     };
 
     SSD1306_Status status = SSD1306_SendCommands(addressing_mode, sizeof(addressing_mode));
@@ -150,10 +136,10 @@ SSD1306_Status SSD1306_Update(void)
 
 void SSD1306_DrawPixel(uint8_t x, uint8_t y, bool on)
 {
-    if (x >= NUM_SEGMENTS || y >= NUM_COMMONS) return;
+    if (x >= SSD1306_NUM_SEGMENTS || y >= SSD1306_NUM_COMMONS) return;
 
-    size_t page = y / PAGE_HEIGHT;
-    uint8_t pixel_mask = 1U << (y % PAGE_HEIGHT);
+    size_t page = y / SSD1306_PAGE_HEIGHT;
+    uint8_t pixel_mask = 1U << (y % SSD1306_PAGE_HEIGHT);
 
     if (on)
         FB(page, x) |= pixel_mask;
@@ -263,8 +249,13 @@ SSD1306_Status SSD1306_StartHorizontalScroll(
     uint8_t end_page
 )
 {
-    if (start_page >= NUM_PAGES || end_page >= NUM_PAGES || start_page > end_page)
+    if (
+        start_page >= SSD1306_NUM_PAGES ||
+        end_page >= SSD1306_NUM_PAGES ||
+        start_page > end_page
+    ) {
         return SSD1306_INVALID_ARGUMENT;
+    }
 
     const uint8_t cmds[] = {
         direction,
